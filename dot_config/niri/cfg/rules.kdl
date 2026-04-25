@@ -1,0 +1,102 @@
+    // niri blur rule
+    // blur {
+    //   passes 3
+    //   offset 3
+    //   noise 0.02
+    //   saturation 1.5
+    // }
+    //
+    // window-rule {
+    //   background-effect {
+    //     xray true
+    //     blur true
+    //   }
+    // }
+    //
+    // window-rule {
+    //   match is-floating=true
+    //   background-effect {
+    //     xray true
+    //     blur true
+    //   }
+    // }
+    //
+    // layer-rule {
+    //     match namespace="^launcher$"
+    //     geometry-corner-radius 8
+    //     background-effect {
+    //       xray false
+    //       blur true
+    //     }
+    // }
+
+
+    window-rule {
+        geometry-corner-radius 14 // Set every window radius to 20
+        clip-to-geometry true
+        opacity 0.95
+        draw-border-with-background false
+    }
+
+     // if you use steam you will probably like these
+    window-rule {
+        match app-id="steam"
+        exclude title=r#"^[Ss]team$"#
+        open-floating true
+    }
+
+    window-rule {
+       match app-id="steam" title=r#"^notificationtoasts_\d+_desktop$"#
+       default-floating-position x=10 y=10 relative-to="bottom-right"
+       open-focused false
+    }
+    
+    // niri-siderbar需要的全局窗口规则
+    window-rule {
+        match is-floating=true
+        min-width 100
+        min-height 100
+    }
+
+    // ===== mpv / celluloid 不透明 =====
+    window-rule {
+        match app-id="mpv"
+        match app-id="celluloid"
+        opacity 1.0
+    }
+
+    layer-rule {
+        match namespace="^noctalia-wallpaper*"
+        place-within-backdrop true
+    }
+
+    // ===== quickterminal =====
+    window-rule {
+        match app-id="quickterminal"
+        open-floating true
+        default-floating-position x=20 y=20 relative-to="top"
+    }
+
+    // Splayer open-floating
+    window-rule {
+      match title="SPlayer - 桌面歌词"
+      open-floating true
+      default-floating-position x=20 y=20 relative-to="bottom"
+    }
+
+    // ===== satty =====
+    window-rule {
+        match app-id="com.gabm.satty"
+        open-floating true
+    }
+
+    // ===== 剪贴板 TUI：你用哪个留哪个 =====
+    window-rule {
+        // match app-id="cliphist-tui"
+        match app-id="clipse"
+
+        default-column-width { fixed 625; }
+        default-window-height { fixed 700; }
+        open-floating true
+        default-floating-position x=0 y=18 relative-to="top"
+    }

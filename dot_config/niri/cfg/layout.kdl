@@ -1,0 +1,58 @@
+    // layout {
+    //     gaps 10 // Gap between windows
+    //     center-focused-column "never" // Don’t auto-center focused column
+
+    //     background-color "transparent" // <- needed for noctalia-shell to set wallpaper
+
+    //     preset-column-widths {
+    //         proportion 0.33333
+    //         proportion 0.5
+    //         proportion 0.66667
+    //     }
+
+    //     struts {}
+    // }
+
+
+layout {
+    // 原配置：
+    // gaps 10
+    gaps 10
+
+    // 原配置：
+    center-focused-column "never"
+    // center-focused-column "on-overflow"
+
+    // 单列时更适合笔记本屏幕
+    // always-center-single-column
+
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+
+    default-column-width {
+        proportion 0.5
+    }
+
+    focus-ring {
+        width 2
+    }
+
+    border {
+        off
+    }
+
+    // 原配置阴影偏重，Noctalia 下建议收一点
+    shadow {
+        on
+        softness 12
+        spread 2
+        offset x=0 y=2
+        // color "rgba(0, 0, 0, 0.35)"
+    }
+
+    // 先不要加全局 background-color / struts
+    background-color "transparent"
+}

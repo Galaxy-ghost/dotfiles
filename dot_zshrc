@@ -1,0 +1,311 @@
+#!/usr/bin/env zsh
+
+# path / xdg
+typeset -U path PATH
+path=("$HOME/.local/bin" $path)
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+
+# proxy配置，当需要proxy的时候执行proxy-on，不需要的时候执行proxy-off
+
+function proxy-on {
+  export http_proxy=http://127.0.0.1:7897
+  export https_proxy=http://127.0.0.1:7897
+  export HTTP_PROXY=$http_proxy
+  export HTTPS_PROXY=$https_proxy
+  echo "Proxy enabled: $http_proxy"
+}
+
+function proxy-off {
+  unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
+  echo "Proxy disabled"
+}
+
+function proxy-status {
+  env | grep -i '_proxy'
+}
+
+
+# app
+export TERMINAL="kitty"
+export BROWSER="zen-browser"
+command -v nvim >/dev/null 2>&1 && export EDITOR="nvim" || export EDITOR="nano"
+command -v code >/dev/null 2>&1 && export VISUAL="code --wait" || export VISUAL="$EDITOR"
+
+# theme
+export BAT_THEME="Catppuccin Mocha"
+export LESS='-R'
+
+# vi mode
+bindkey -v
+export KEYTIMEOUT=10
+
+function _set_cursor_block() {
+  printf '\e[2 q'
+}
+
+function _set_cursor_beam() {
+  printf '\e[6 q'
+}
+
+function _set_cursor_underline() {
+  printf '\e[4 q'
+}
+
+function zle-keymap-select {
+  case $KEYMAP in
+    vicmd)
+      _set_cursor_block
+      ;;
+    viins|main)
+      _set_cursor_beam
+      ;;
+    *)
+      _set_cursor_beam
+      ;;
+  esac
+}
+
+function zle-line-init {
+  _set_cursor_beam
+}
+
+function zle-line-finish {
+  _set_cursor_beam
+}
+
+zle -N zle-keymap-select
+zle -N zle-line-init
+zle -N zle-line-finish
+
+# ===== Zinit =====
+ZINIT_HOME="${XDG_DATA_HOME}/zinit/zinit.git"
+
+if [[ -r "$ZINIT_HOME/zinit.zsh" ]]; then
+  source "$ZINIT_HOME/zinit.zsh"
+  autoload -Uz _zinit
+  (( ${+_comps} )) && _comps[zinit]=_zinit
+else
+  print -P "%F{yellow}[zinit]%f not found: $ZINIT_HOME"
+fi
+
+# extra completions(cli completions)
+if typeset -f zinit >/dev/null 2>&1; then
+  zinit ice depth"1"
+  zinit light zsh-users/zsh-completions
+fi
+
+# autocomplete
+# 原来是手动 source /usr/share/zsh/plugins/zsh-autocomplete/...
+# 现在交给 zinit。若 zinit 不存在，则 fallback 到系统插件。
+if typeset -f zinit >/dev/null 2>&1; then
+  zinit ice depth"1"
+  zinit light marlonrichert/zsh-autocomplete
+elif [[ -f /usr/share/zsh/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]]; then
+  source /usr/share/zsh/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+fi
+
+bindkey -M viins '^K' menu-select
+bindkey -M viins '^P' menu-select
+
+bindkey -M menuselect '^K' menu-complete
+bindkey -M menuselect '^P' reverse-menu-complete
+
+# history
+mkdir -p "$XDG_STATE_HOME/zsh" "$XDG_CACHE_HOME/zsh"
+export HISTFILE="$XDG_STATE_HOME/zsh/history"
+HISTSIZE=50000
+SAVEHIST=50000
+
+setopt EXTENDED_HISTORY
+setopt APPEND_HISTORY
+setopt INC_APPEND_HISTORY
+setopt SHARE_HISTORY
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_FIND_NO_DUPS
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_REDUCE_BLANKS
+setopt HIST_VERIFY
+
+# shell behavior
+setopt AUTO_CD
+setopt AUTO_PUSHD
+setopt PUSHD_IGNORE_DUPS
+setopt PUSHD_SILENT
+setopt INTERACTIVE_COMMENTS
+setopt NO_BEEP
+setopt PROMPT_SUBST
+
+# 补全优化
+LISTMAX=1000
+
+# history prefix search
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey -M viins '^[[A' up-line-or-beginning-search
+bindkey -M viins '^[[B' down-line-or-beginning-search
+bindkey -M vicmd '^[[A' up-line-or-beginning-search
+bindkey -M vicmd '^[[B' down-line-or-beginning-search
+
+# common keys
+bindkey -M viins '^[[H' beginning-of-line
+bindkey -M viins '^[[F' end-of-line
+bindkey -M vicmd '^[[H' beginning-of-line
+bindkey -M vicmd '^[[F' end-of-line
+bindkey -M viins '^[[1;5D' backward-word
+bindkey -M viins '^[[1;5C' forward-word
+bindkey -M vicmd '^[[1;5D' backward-word
+bindkey -M vicmd '^[[1;5C' forward-word
+bindkey -M viins '^?' backward-delete-char
+
+# fzf
+export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
+if command -v fd >/dev/null 2>&1; then
+  export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+  export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+  export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+fi
+
+# atuin: Ctrl-r 搜历史
+if command -v atuin >/dev/null 2>&1; then
+  eval "$(atuin init zsh --disable-up-arrow)"
+fi
+
+# zoxide: z / zi 跳目录
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+fi
+alias j='zi'
+function cdf { zi "$@"; }
+
+# direnv
+if command -v direnv >/dev/null 2>&1; then
+  eval "$(direnv hook zsh)"
+fi
+
+# mise
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi
+
+# ssh key helper
+function set-ssh-key() {
+  local key="$HOME/.ssh/$1"
+  if [[ ! -f "$key" ]]; then
+    echo "Key not found: $key" >&2
+    echo "Available keys:" >&2
+    ls ~/.ssh/*.pub 2>/dev/null | sed 's/.*\//  /; s/\.pub$//' >&2
+    return 1
+  fi
+  ssh-add -D 2>/dev/null
+  ssh-add "$key"
+  echo "Active SSH key: $1"
+}
+
+# aliases
+alias ls='eza --icons=auto --group-directories-first'
+alias ll='eza -lah --icons=auto --group-directories-first'
+alias la='eza -a --icons=auto'
+alias lt='eza --tree --icons=auto --level=2'
+alias cat='bat --style=plain --paging=never'
+alias ff='fd'
+# alias grep='rg'
+alias top='btop'
+alias lg='lazygit'
+alias g='git'
+alias c='clear'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# config helpers
+unalias zc zs nr kc sc 2>/dev/null
+
+function edit-preferred {
+  if command -v code >/dev/null 2>&1; then
+    code --wait "$@"
+  elif command -v nvim >/dev/null 2>&1; then
+    nvim "$@"
+  else
+    nano "$@"
+  fi
+}
+
+function zu {
+  zinit self-update
+  zinit update
+}
+
+function zc { edit-preferred ~/.zshrc; }
+function zs { exec zsh; }
+function nr { edit-preferred ~/.config/niri/config.kdl; }
+function kc { edit-preferred ~/.config/kitty/kitty.conf; }
+function sc { edit-preferred ~/.config/starship.toml; }
+
+# ===== AI helpers =====
+
+# 普通问答
+function ai {
+  llm "$*"
+}
+
+# 解释一条命令
+function aix {
+  llm "请用简洁中文解释这条 Linux 命令，说明每个参数的作用、风险和替代写法：$*"
+}
+
+# 生成命令，但只输出，不执行
+function aic {
+  llm "你是 Linux/CachyOS 终端助手。根据我的需求生成一条或多条可执行命令。只输出命令和必要注释，不要执行。需求：$*"
+}
+
+# 解释上一条命令
+function ailast {
+  fc -ln -1 | llm "请解释这条 shell 命令的作用、每个管道阶段、潜在风险："
+}
+
+
+# autosuggestions config
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+ZSH_AUTOSUGGEST_USE_ASYNC=1
+
+# autosuggestions
+# 原来是手动 source /usr/share/zsh/plugins/zsh-autosuggestions/...
+# 现在交给 zinit。若 zinit 不存在，则 fallback 到系统插件。
+if typeset -f zinit >/dev/null 2>&1; then
+  zinit ice depth"1"
+  zinit light zsh-users/zsh-autosuggestions
+elif [[ -f /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+  source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+elif [[ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+  source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
+
+# gitee
+git config --global user.name 'Shinax'
+git config --global user.email '1939778183@qq.com'
+
+# prompt
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
+
+# syntax highlight: 必须作为最后一个 zsh 插件加载
+# 原来是手动 source /usr/share/zsh/plugins/zsh-syntax-highlighting/...
+# 现在交给 zinit。若 zinit 不存在，则 fallback 到系统插件。
+if typeset -f zinit >/dev/null 2>&1; then
+  zinit ice depth"1"
+  zinit light zsh-users/zsh-syntax-highlighting
+elif [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+  source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+elif [[ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+  source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+

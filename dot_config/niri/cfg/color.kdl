@@ -1,0 +1,27 @@
+// layout{
+//     focus-ring{
+//         active-gradient from="#88d6bbcc" to="#a8cbe2cc" angle=135
+//         urgent-color "#ffb4ab"
+
+//         }
+// }
+// recent-windows {    
+//     highlight {
+//         active-color "#343b38"
+//         urgent-color "#ffb4ab"
+//     }
+// }
+
+layout {
+    focus-ring {
+        active-gradient from="#7aa2f7cc" to="#89dcebcc" angle=135
+        urgent-color "#f38ba8"
+    }
+}
+
+recent-windows {
+    highlight {
+        active-color "#2b3144cc"
+        urgent-color "#f38ba8"
+    }
+}
