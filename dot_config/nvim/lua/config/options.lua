@@ -120,3 +120,12 @@ opt.wrap = false -- Disable line wrap
 
 -- Fix markdown indentation settings
 vim.g.markdown_recommended_style = 0
+
+-- Python LSP
+vim.g.lazyvim_python_lsp = "pyright"
+
+-- Ruff server
+vim.g.lazyvim_python_ruff = "ruff"
+
+-- Neovim Python provider
+vim.g.python3_host_prog = vim.fn.expand("~/.local/share/nvim/venv/bin/python")
