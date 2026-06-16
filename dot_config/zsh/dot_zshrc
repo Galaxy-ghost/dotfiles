@@ -1,0 +1,33 @@
+#!/usr/bin/env zsh
+
+# Main interactive zsh entrypoint.
+[[ -o interactive ]] || return 0
+
+typeset -g ZSH_CONFIG_HOME="${ZDOTDIR:-${XDG_CONFIG_HOME:-$HOME/.config}/zsh}"
+typeset -g ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+typeset -g ZSH_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/zsh"
+
+mkdir -p "$ZSH_CACHE_DIR" "$ZSH_STATE_DIR"
+
+typeset -ga zsh_config_files=(
+  environment
+  options
+  vi-mode
+  completion
+  plugins
+  keybindings
+  tools
+  aliases
+  functions
+  prompt
+  vendor
+  final-plugins
+)
+
+for config_file in "${zsh_config_files[@]}"; do
+  source "$ZSH_CONFIG_HOME/conf.d/$config_file.zsh"
+done
+unset config_file zsh_config_files
+
+# Machine-local overrides live here and are intentionally not split further.
+[[ -r "$ZSH_CONFIG_HOME/local.zsh" ]] && source "$ZSH_CONFIG_HOME/local.zsh"

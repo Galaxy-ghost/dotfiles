@@ -1,0 +1,6 @@
+# Copy to local.zsh for machine-local overrides that should not become part of
+# the shared config.
+#
+# Example:
+# export PROXY_URL="http://127.0.0.1:7897"
+# path=("$HOME/bin" $path)
