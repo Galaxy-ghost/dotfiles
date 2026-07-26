@@ -11,7 +11,7 @@ LazyVim v8 based Neovim config. `init.lua` bootstraps lazy.nvim, which loads Laz
 | Directory/File | Purpose |
 |---|---|
 | `lua/config/options.lua` | All `vim.opt` settings, LazyVim globals |
-| `lua/config/keymaps.lua` | Custom keymaps (extends LazyVim defaults) |
+| `lua/config/keymaps.lua` | *(absent)* — LazyVim defaults are used as-is. Add this file only for real deltas; to drop an upstream map use `vim.keymap.del`, since re-declaring or commenting out upstream lines has no effect |
 | `lua/config/autocmds.lua` | Custom autocommands |
 | `lua/config/lazy.lua` | lazy.nvim bootstrap + plugin loader setup |
 | `lua/plugins/*.lua` | Plugin specs — each file returns a spec table for lazy.nvim |
@@ -32,4 +32,4 @@ stylua with 2-space indent, 120 char column width. Run: `stylua .`
 
 ## LazyVim Extras
 
-Enabled via `lazyvim.json`: dap.core, lang.json, lang.markdown, lang.python, lang.toml, test.core
+Enabled via `lazyvim.json`: dap.core, lang.clangd, lang.cmake, lang.json, lang.markdown, lang.python, lang.toml, test.core

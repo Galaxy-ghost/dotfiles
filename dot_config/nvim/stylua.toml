@@ -1,3 +1,3 @@
-indent_type = "Spaces"
-indent_width = 2
-column_width = 120
+indent_type = "Spaces" # 使用空格缩进。
+indent_width = 2 # 每级缩进 2 个空格。
+column_width = 120 # 单行宽度上限为 120。
